@@ -1,7 +1,7 @@
 import { fetchAPI } from "@/lib/api";
 import { permanentRedirect } from "next/navigation";
 import { NextRequest } from "next/server";
-import { Token, tokenToJWT, storeJWT } from "@/lib/auth_jwt";
+import { Token, tokenToJwt, storeJwt } from "@/lib/auth_jwt";
 
 async function fetchAuthToken(code: string) {
     const params = {
@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
     const token: Token | undefined = await fetchAuthToken(code);
     if (token === undefined) return permanentRedirect("/");
 
-    const { jwt, maxAge }: { jwt: string; maxAge: number } = await tokenToJWT(token);
+    const { jwt, expires }: { jwt: string; expires: number } = await tokenToJwt(token);
 
-    storeJWT(jwt, maxAge);
+    storeJwt(jwt, expires);
 
     return permanentRedirect("/");
     
