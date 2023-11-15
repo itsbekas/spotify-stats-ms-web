@@ -1,17 +1,7 @@
-import { fetchAPI } from "@/lib/api";
 import { permanentRedirect } from "next/navigation";
 import { NextRequest } from "next/server";
-import { Token, tokenToJwt, storeJwt } from "@/lib/auth_jwt";
-
-async function fetchAuthToken(code: string) {
-    const params = {
-        code: code
-    }
-    const res = await fetchAPI("/login/callback", params);
-    if (!res.ok) return undefined;
-    const token = res.json() as Promise<Token>;
-    return token;
-}
+import { AuthToken } from "@/lib/auth/token";
+import { SpotifyAuthResponse, fetchAuthToken } from "@/lib/auth/spotify";
 
 export async function GET(request: NextRequest) {
     
@@ -19,12 +9,12 @@ export async function GET(request: NextRequest) {
     const code: string | null = request.nextUrl.searchParams.get("code");
     if (code === null) return permanentRedirect("/");
     
-    const token: Token | undefined = await fetchAuthToken(code);
-    if (token === undefined) return permanentRedirect("/");
+    const res: SpotifyAuthResponse | undefined = await fetchAuthToken(code);
+    if (res === undefined) return permanentRedirect("/");
 
-    const { jwt, expires }: { jwt: string; expires: number } = await tokenToJwt(token);
+    const token: AuthToken = await AuthToken.fromSpotifyResponse(res);
 
-    storeJwt(jwt, expires);
+    await token.store();
 
     return permanentRedirect("/");
     
