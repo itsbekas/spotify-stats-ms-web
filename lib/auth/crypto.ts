@@ -59,8 +59,8 @@ export async function decryptToken(tokenAsStr: string, aesKey: CryptoKey, iv: Ui
         encryptedToken,
     );
 
-    const te = new TextDecoder();
-    const token = te.decode(encodedToken);
+    const td = new TextDecoder();
+    const token = td.decode(encodedToken);
 
     return token;
 }

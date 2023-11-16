@@ -4,22 +4,23 @@ import { NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
 
-    console.log("running middleware")
-
     var authToken: AuthToken | undefined = await AuthToken.fromCookie();
 
     // if authToken is undefined and the request is not to the login page, redirect to login
     if (authToken === undefined) {
         if (!request.nextUrl.pathname.startsWith("/login")) {
-            return NextResponse.redirect("/login");
+            return NextResponse.redirect(new URL('/login', request.url));
         } else {
             return;
         }
     }
 
     if (authToken.isExpired()) {
-        console.log("refreshing")
-        await authToken.refresh(); // Doesn't modify authToken, stores new token in cookie
+        if (!request.nextUrl.pathname.startsWith("/login")) {
+            return NextResponse.redirect(new URL('/login/refresh', request.url));
+        } else {
+            return;
+        }
     }
 
 }

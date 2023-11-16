@@ -26,7 +26,7 @@ export async function fetchAuthToken(code: string): Promise<SpotifyAuthResponse 
     return token;
 }
 
-export async function fetchRefreshedToken(refreshToken: string): Promise<SpotifyAuthResponse | undefined> {
+export async function fetchRefreshToken(refreshToken: string): Promise<SpotifyAuthResponse | undefined> {
     const params = {
         refresh_token: refreshToken
     }

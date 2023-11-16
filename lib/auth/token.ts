@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { getAESKey, getSigningSecret, encryptToken, decryptToken } from "./crypto";
-import { SpotifyAuthResponse, fetchRefreshedToken } from "./spotify";
+import { SpotifyAuthResponse } from "./spotify";
 
 import * as jose from "jose";
 
@@ -33,16 +33,13 @@ export class AuthToken {
         const aesKey = await getAESKey();
         const iv = crypto.getRandomValues(new Uint8Array(16));
 
-        console.log(iv);
-        console.log("####################");
-
         const encAccessToken = await encryptToken(res.access_token, aesKey, iv);
         const encRefreshToken = await encryptToken(res.refresh_token, aesKey, iv);
 
         const token = new AuthToken(
             encAccessToken,
             encRefreshToken,
-            Buffer.from(iv).toString("base64"),
+            iv.toString(),
             res.expires_at,
             res.scope,
         );
@@ -70,8 +67,6 @@ export class AuthToken {
 
         const payload: Payload = jwt.payload as Payload;
 
-        console.log(payload)
-
         const token = new AuthToken(
             payload.acc,
             payload.ref,
@@ -90,7 +85,7 @@ export class AuthToken {
             "acc": this.accessToken,
             "ref": this.refreshToken,
             "scp": this.scope,
-            "iv": Buffer.from(this.iv).toString("base64"),
+            "iv": this.iv,
             "exp": this.expiresAt,
         }
 
@@ -99,26 +94,11 @@ export class AuthToken {
         const token = await new jose.SignJWT(payload)
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
-            .setExpirationTime(this.expiresAt)
+            .setExpirationTime("90d")
             .sign(secret);
 
         return token;
 
-    }
-
-    async refresh(): Promise<void> {
-        /**
-         * Refreshes the access token and stores it in the cookie
-         */
-        const refreshToken = await this.getRefreshToken();
-        if (refreshToken === undefined) return;
-
-        const res = await fetchRefreshedToken(refreshToken);
-        if (res === undefined) return;
-
-        const newToken = await AuthToken.fromSpotifyResponse(res);
-
-        await newToken.store();
     }
 
     async store() {
@@ -130,30 +110,27 @@ export class AuthToken {
             httpOnly: true,
             sameSite: "lax",
             secure: true,
-            path: "/",
             expires: expires,
         });
     }
 
     async getAccessToken(): Promise<string> {
         const aesKey = await getAESKey();
-        const iv = Buffer.from(this.iv, "base64");
-        console.log(iv);
+        const iv = Uint8Array.from(this.iv.split(',').map(x=>parseInt(x,10)));
         const accessToken = await decryptToken(this.accessToken, aesKey, iv);
         return accessToken;
     }
 
     async getRefreshToken(): Promise<string> {
         const aesKey = await getAESKey();
-        const iv = Buffer.from(this.iv, "base64");
-        console.log(iv);
+        const iv = Uint8Array.from(this.iv.split(',').map(x=>parseInt(x,10)));
         const refreshToken = await decryptToken(this.refreshToken, aesKey, iv);
         return refreshToken;
     }
 
     isExpired(): boolean {
-        return true;
-        return this.expiresAt < Date.now() / 1000;
+        // is expired if issued over 1 hour ago
+        return Date.now() / 1000 - this.expiresAt > 60 * 60;
     }
 
 }
