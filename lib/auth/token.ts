@@ -79,6 +79,14 @@ export class AuthToken {
 
     }
 
+    static deleteCookie() {
+        cookies().delete(JWT_NAME);
+    }
+
+    static isLoggedIn() {
+        return cookies().get(JWT_NAME) !== undefined;
+    }
+
     private async toJwt(): Promise<string> {
         
         const payload = {

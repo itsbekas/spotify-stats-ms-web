@@ -1,7 +1,9 @@
+import { AuthToken } from '@/lib/auth/token';
+
 export default function Home() {
   return (
     <div>
-      <a href="/login">Login</a>
+      {AuthToken.isLoggedIn() ? 'Logged in' : 'Not logged in'}
     </div>
   )
 }

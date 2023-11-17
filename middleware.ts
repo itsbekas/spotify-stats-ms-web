@@ -6,10 +6,10 @@ export async function middleware(request: NextRequest) {
 
     var authToken: AuthToken | undefined = await AuthToken.fromCookie();
 
-    // if authToken is undefined and the request is not to the login page, redirect to login
+    // if authToken is undefined and the request is not to the login page or homepage, redirect to homepage
     if (authToken === undefined) {
-        if (!request.nextUrl.pathname.startsWith("/login")) {
-            return NextResponse.redirect(new URL('/login', request.url));
+        if (!request.nextUrl.pathname.startsWith("/login") && !request.nextUrl.pathname.startsWith("/")) {
+            return NextResponse.redirect(new URL('/', request.url));
         } else {
             return NextResponse.next();
         }
