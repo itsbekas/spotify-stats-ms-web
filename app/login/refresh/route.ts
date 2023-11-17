@@ -18,6 +18,6 @@ export async function GET(request: NextRequest) {
 
     await newToken.store();
 
-    return NextResponse.redirect(new URL('/', request.url));
+    return permanentRedirect(request.nextUrl.pathname);
 
 }

@@ -11,15 +11,15 @@ export async function middleware(request: NextRequest) {
         if (!request.nextUrl.pathname.startsWith("/login")) {
             return NextResponse.redirect(new URL('/login', request.url));
         } else {
-            return;
+            return NextResponse.next();
         }
     }
 
     if (authToken.isExpired()) {
         if (!request.nextUrl.pathname.startsWith("/login")) {
-            return NextResponse.redirect(new URL('/login/refresh', request.url));
+            return NextResponse.rewrite(new URL('/login/refresh', request.url));
         } else {
-            return;
+            return NextResponse.next();
         }
     }
 

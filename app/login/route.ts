@@ -6,4 +6,5 @@ export async function GET() {
     const authURL: string | undefined = await fetchAuthURL();
 
     permanentRedirect(authURL!);
+    
 }
