@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
 
     // if authToken is undefined and the request is not to the login page or homepage, redirect to homepage
     if (authToken === undefined) {
-        if (!request.nextUrl.pathname.startsWith("/login") && !request.nextUrl.pathname.startsWith("/")) {
+        if (!request.nextUrl.pathname.startsWith("/login") && !(request.nextUrl.pathname === "/")) {
             return NextResponse.redirect(new URL('/', request.url));
         } else {
             return NextResponse.next();
