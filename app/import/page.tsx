@@ -5,6 +5,10 @@ import { jsonIsValid } from '@/lib/files/validate_json';
 
 export default function Page() {
 
+    const VALID = 0;
+    const INVALID = 1;
+    const DUPLICATE = 2;
+
     const [files, setFiles] = useState<{valid: File[], invalid: string[], duplicate: string[]}>({
         valid: [],
         invalid: [],
@@ -21,41 +25,55 @@ export default function Page() {
             
             const promises = newFiles.map(async (file) => {
                 if (files.valid.find((validFile) => validFile.name === file.name)) {
-                    return file.name;
+                    return {
+                        file: file,
+                        status: DUPLICATE,
+                    }
                 }
 
                 try {
                     const isValid = await jsonIsValid(file, schemaFile);
                     if (isValid) {
-                        return file;
+                        return {
+                            file: file,
+                            status: VALID,
+                        };
                     } else {
-                        return null;
+                        return {
+                            file: file,
+                            status: INVALID,
+                        };
                     }
                 } catch (error) {
-                    console.error("Error validating file: ", file.name, error);
-                    return null;
+                    return {
+                        file: file,
+                        status: INVALID,
+                    };
                 }
             });
 
             Promise.all(promises)
                 .then((results) => {
-                    // TODO: fix types and finish this + testing
-                    // FIXME: maybe return everything as files and get the name from the file object
-                    const validFiles: File[] = results.filter((file) => file !== null && typeof file !== "string");
-                    const invalidFiles: string[] = results.filter((file) => file === null);
-                    const duplicateFiles: string[] = results.filter((file) => typeof file === "string");
-
+                    const validFiles: File[] = results
+                                                .filter((file) => file.status === VALID)
+                                                .map((file) => file.file);
+                    const invalidFiles: string[] = results
+                                                .filter((file) => file.status === INVALID)
+                                                .map((file) => file.file.name);
+                    const duplicateFiles: string[] = results
+                                                .filter((file) => file.status === DUPLICATE)
+                                                .map((file) => file.file.name);
                     setFiles({
                         valid: [...files.valid, ...validFiles],
-                        invalid: [...files.invalid, ...invalidFiles],
-                        duplicate: [...files.duplicate, ...duplicateFiles]
+                        invalid: [...invalidFiles],
+                        duplicate: [...duplicateFiles]
                     });
                 });
         }
     }
 
     const renderSubmittedFiles = () => {
-        return files.valid.map((file, index) => {
+        return files.valid.sort().map((file, index) => {
             return (
                 <div key={index}>
                     <p>{file.name}</p>
@@ -71,7 +89,7 @@ export default function Page() {
         }
         return (
             <div>
-                <p>{`File${files.invalid.length === 1 ? "s" : ""} ${files.invalid.join(', ')} are invalid.`}</p>
+                {`Files ${files.invalid.join(', ')} are invalid.`}
             </div>
         )
     }
@@ -83,7 +101,7 @@ export default function Page() {
         }
         return (
             <div>
-                <p>{`File${files.duplicate.length === 1 ? "s" : ""} ${files.duplicate.join(', ')} are duplicates.`}</p>
+                {`Files ${files.duplicate.join(', ')} are duplicates.`}
             </div>
         )
     }
@@ -99,7 +117,6 @@ export default function Page() {
             {renderSubmittedFiles()}
             {renderInvalidFiles()}
             {renderDuplicateFiles()}
-
         </div>
     );
 }
