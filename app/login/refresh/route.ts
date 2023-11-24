@@ -6,12 +6,12 @@ import { SpotifyAuthResponse, fetchRefreshToken } from "@/lib/auth/spotify";
 export async function GET(request: NextRequest) {
 
     const currToken: AuthToken | undefined = await AuthToken.fromCookie();
-    if (currToken === undefined) return permanentRedirect("/refresh-error1");
+    if (currToken === undefined) permanentRedirect("/refresh-error1");
 
     const refreshToken = await currToken.getRefreshToken();
 
     const res: SpotifyAuthResponse | undefined = await fetchRefreshToken(refreshToken);
-    if (res === undefined) return permanentRedirect("/refresh-error-2");
+    if (res === undefined) permanentRedirect("/refresh-error-2");
 
     const newToken: AuthToken = await AuthToken.fromSpotifyResponse(res);
 
@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
 
     // Avoid infinite redirect loop
     if (request.nextUrl.pathname === "/login/refresh") {
-        return permanentRedirect("/");
+        permanentRedirect("/");
     }
 
-    return permanentRedirect(request.nextUrl.pathname);
+    permanentRedirect(request.nextUrl.pathname);
 
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { jsonIsValid } from '@/lib/files/validate_json';
+import axios from 'axios';
 
 export default function Page() {
 
@@ -72,7 +73,23 @@ export default function Page() {
         }
     }
 
+    const submitFiles = () => {
+        // Submit the file contents to the server as a json object
+        const promises = files.valid.map(async (file) => {
+            const fileContents = await file.text();
+            const fileObject = JSON.parse(fileContents);
+            return axios.post('/import/upload', fileObject);
+        });
+
+        Promise.all(promises)
+            .then((results) => {
+                console.log(results.map((result) => JSON.stringify(result)));
+            });
+
+    }
+
     const renderSubmittedFiles = () => {
+        // Enhance: Regex to capture number at end of file name and sort by that
         return files.valid.sort().map((file, index) => {
             return (
                 <div key={index}>
@@ -117,6 +134,7 @@ export default function Page() {
             {renderSubmittedFiles()}
             {renderInvalidFiles()}
             {renderDuplicateFiles()}
+            <button onClick={submitFiles}>Submit</button>
         </div>
     );
 }
