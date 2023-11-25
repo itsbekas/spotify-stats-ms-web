@@ -8,16 +8,18 @@
         "type": "object",
         "properties": {
             "ts": { "type": "string" },
+            "ms_played": { "type": "integer" },
+            "spotify_track_uri": { "type": ["string", "null"] }
+        },
+        "optionalProperties": {
             "username": { "type": "string" },
             "platform": { "type": "string" },
-            "ms_played": { "type": "integer" },
             "conn_country": { "type": "string" },
             "ip_addr_decrypted": { "type": "string" },
             "user_agent_decrypted": { "type": ["string", "null"] },
             "master_metadata_track_name": { "type": ["string", "null"] },
             "master_metadata_album_artist_name": { "type": ["string", "null"] },
             "master_metadata_album_album_name": { "type": ["string", "null"] },
-            "spotify_track_uri": { "type": ["string", "null"] },
             "episode_name": { "type": ["string", "null"] },
             "episode_show_name": { "type": ["string", "null"] },
             "episode_show_uri": { "type": ["string", "null"] },
@@ -29,11 +31,7 @@
             "offline_timestamp": { "type": "integer" },
             "incognito_mode": { "type": "boolean" }
         },
-        "required": [
-            "ts",
-            "ms_played",
-            "spotify_track_uri"
-        ],
+        "required": ["ts", "ms_played", "spotify_track_uri"],
         "additionalProperties": false
     },
     "minItems": 1

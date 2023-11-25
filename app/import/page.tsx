@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { jsonIsValid } from '@/lib/files/validate_json';
+import { jsonIsValid, HISTORY } from '@/lib/files/validate_json';
 import axios from 'axios';
 
 export default function Page() {
@@ -22,7 +22,6 @@ export default function Page() {
 
         if (selectedFiles) {
             const newFiles: File[] = Array.from(selectedFiles);
-            const schemaFile = require('./schema.json');
             
             const promises = newFiles.map(async (file) => {
                 if (files.valid.find((validFile) => validFile.name === file.name)) {
@@ -33,7 +32,7 @@ export default function Page() {
                 }
 
                 try {
-                    const isValid = await jsonIsValid(file, schemaFile);
+                    const isValid = await jsonIsValid(file, HISTORY);
                     if (isValid) {
                         return {
                             file: file,
@@ -56,14 +55,14 @@ export default function Page() {
             Promise.all(promises)
                 .then((results) => {
                     const validFiles: File[] = results
-                                                .filter((file) => file.status === VALID)
-                                                .map((file) => file.file);
+                                                .filter((result) => result.status === VALID)
+                                                .map((result) => result.file);
                     const invalidFiles: string[] = results
-                                                .filter((file) => file.status === INVALID)
-                                                .map((file) => file.file.name);
+                                                .filter((result) => result.status === INVALID)
+                                                .map((result) => result.file.name);
                     const duplicateFiles: string[] = results
-                                                .filter((file) => file.status === DUPLICATE)
-                                                .map((file) => file.file.name);
+                                                .filter((result) => result.status === DUPLICATE)
+                                                .map((result) => result.file.name);
                     setFiles({
                         valid: [...files.valid, ...validFiles],
                         invalid: [...invalidFiles],
@@ -83,7 +82,7 @@ export default function Page() {
 
         Promise.all(promises)
             .then((results) => {
-                console.log(results.map((result) => JSON.stringify(result)));
+                console.log(results.map((result) => result));
             });
 
     }

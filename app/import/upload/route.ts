@@ -4,9 +4,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
 
+    console.log(await request.json());
+
+    console.log("teste1");
     // validate json
-    const json = request.json();
+    const data = request.json();
     
-    return NextResponse.json({ data: json });
+    return NextResponse.json({ data });
 
 }
