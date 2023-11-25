@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { jsonIsValid, HISTORY } from '@/lib/files/validate_json';
+import { validateJson, IMPORT } from '@/lib/files/validate_json';
 import axios from 'axios';
 
 export default function Page() {
@@ -10,7 +10,13 @@ export default function Page() {
     const INVALID = 1;
     const DUPLICATE = 2;
 
-    const [files, setFiles] = useState<{valid: File[], invalid: string[], duplicate: string[]}>({
+    type FileStatus = {
+        data: JSON | undefined,
+        name: string,
+        status: number,
+    }
+
+    const [files, setFiles] = useState<{valid: FileStatus[], invalid: FileStatus[], duplicate: FileStatus[]}>({
         valid: [],
         invalid: [],
         duplicate: []
@@ -20,33 +26,38 @@ export default function Page() {
         
         const selectedFiles = event.target.files;
 
+
         if (selectedFiles) {
             const newFiles: File[] = Array.from(selectedFiles);
             
             const promises = newFiles.map(async (file) => {
                 if (files.valid.find((validFile) => validFile.name === file.name)) {
                     return {
-                        file: file,
+                        data: undefined,
+                        name: file.name,
                         status: DUPLICATE,
                     }
                 }
 
                 try {
-                    const isValid = await jsonIsValid(file, HISTORY);
-                    if (isValid) {
+                    const data: JSON | undefined = await validateJson(file, IMPORT);
+                    if (data !== undefined) {
                         return {
-                            file: file,
+                            data: data,
+                            name: file.name,
                             status: VALID,
                         };
                     } else {
                         return {
-                            file: file,
+                            data: data,
+                            name: file.name,
                             status: INVALID,
                         };
                     }
                 } catch (error) {
                     return {
-                        file: file,
+                        data: undefined,
+                        name: file.name,
                         status: INVALID,
                     };
                 }
@@ -54,15 +65,12 @@ export default function Page() {
 
             Promise.all(promises)
                 .then((results) => {
-                    const validFiles: File[] = results
-                                                .filter((result) => result.status === VALID)
-                                                .map((result) => result.file);
-                    const invalidFiles: string[] = results
-                                                .filter((result) => result.status === INVALID)
-                                                .map((result) => result.file.name);
-                    const duplicateFiles: string[] = results
-                                                .filter((result) => result.status === DUPLICATE)
-                                                .map((result) => result.file.name);
+                    const validFiles: FileStatus[] = results
+                                                .filter((result) => result.status === VALID);
+                    const invalidFiles: FileStatus[] = results
+                                                .filter((result) => result.status === INVALID);
+                    const duplicateFiles: FileStatus[] = results
+                                                .filter((result) => result.status === DUPLICATE);
                     setFiles({
                         valid: [...files.valid, ...validFiles],
                         invalid: [...invalidFiles],
@@ -75,9 +83,7 @@ export default function Page() {
     const submitFiles = () => {
         // Submit the file contents to the server as a json object
         const promises = files.valid.map(async (file) => {
-            const fileContents = await file.text();
-            const fileObject = JSON.parse(fileContents);
-            return axios.post('/import/upload', fileObject);
+            return axios.post('/import/upload', file.data);
         });
 
         Promise.all(promises)
@@ -105,7 +111,7 @@ export default function Page() {
         }
         return (
             <div>
-                {`Files ${files.invalid.join(', ')} are invalid.`}
+                {`Invalid files: ${files.invalid.length}`} <br />
             </div>
         )
     }
@@ -117,7 +123,7 @@ export default function Page() {
         }
         return (
             <div>
-                {`Files ${files.duplicate.join(', ')} are duplicates.`}
+                {`Duplicate files: ${files.duplicate.length}`} <br />
             </div>
         )
     }

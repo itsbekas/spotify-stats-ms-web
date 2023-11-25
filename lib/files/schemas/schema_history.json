@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "http://localhost:3000/schemas/streaming_history.json",
+    "$id": "http://localhost:3000/schemas/schema_history.json",
     "title": "Streaming History Audio",
     "description": "History of every song played on Spotify",
     "type": "array",
@@ -9,10 +9,29 @@
         "properties": {
             "ts": { "type": "string" },
             "ms_played": { "type": "integer" },
-            "spotify_track_uri": { "type": ["string", "null"] }
+            "spotify_track_uri": { "type": "string", "nullable": true }
         },
         "required": ["ts", "ms_played", "spotify_track_uri"],
-        "additionalProperties": false
+        "additionalProperties": {
+            "username": { "type": "string" },
+            "platform": { "type": "string" },
+            "conn_country": { "type": "string" },
+            "ip_addr_decrypted": { "type": "string" },
+            "user_agent_decrypted": { "type": "string", "nullable": true },
+            "master_metadata_track_name": { "type": "string", "nullable": true },
+            "master_metadata_album_artist_name": { "type": "string", "nullable": true },
+            "master_metadata_album_album_name": { "type": "string", "nullable": true },
+            "episode_name": { "type": "string", "nullable": true },
+            "episode_show_name": { "type": "string", "nullable": true },
+            "episode_show_uri": { "type": "string", "nullable": true },
+            "reason_start": { "type": "string" },
+            "reason_end": { "type": "string" },
+            "shuffle": { "type": "boolean" },
+            "skipped": { "type": "boolean", "nullable": true },
+            "offline": { "type": "boolean" },
+            "offline_timestamp": { "type": "integer" },
+            "incognito_mode": { "type": "boolean" }
+        }
     },
     "minItems": 1
 }
