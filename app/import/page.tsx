@@ -136,6 +136,7 @@ export default function Page() {
                 multiple
                 accept=".json"
             />
+            {/* // TODO: use components instead of functions (pass list of files as a prop) */}
             {renderSubmittedFiles()}
             {renderInvalidFiles()}
             {renderDuplicateFiles()}

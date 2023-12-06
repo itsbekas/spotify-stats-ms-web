@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "http://localhost:3000/schemas/schema_history.json",
+    "$id": "http://127.0.0.1:3000/schemas/schema_history.json",
     "title": "Streaming History Audio",
     "description": "History of every song played on Spotify",
     "type": "array",

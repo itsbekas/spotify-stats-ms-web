@@ -1,4 +1,4 @@
-import { fetchAPI } from "@/lib/api";
+import { get } from "@/lib/api";
 
 export type SpotifyAuthResponse = {
     access_token: string,
@@ -10,7 +10,7 @@ export type SpotifyAuthResponse = {
 }
 
 export async function fetchAuthURL(): Promise<string | undefined> {
-    const res = await fetchAPI("/login");
+    const res = await get("/login");
     if (!res.ok) return undefined;
     const loginURL = await res.json();
     return loginURL;
@@ -20,7 +20,7 @@ export async function fetchAuthToken(code: string): Promise<SpotifyAuthResponse 
     const params = {
         code: code
     }
-    const res = await fetchAPI("/login/callback", params);
+    const res = await get("/login/callback", params);
     if (!res.ok) return undefined;
     const token = res.json() as Promise<SpotifyAuthResponse>;
     return token;
@@ -30,7 +30,7 @@ export async function fetchRefreshToken(refreshToken: string): Promise<SpotifyAu
     const params = {
         refresh_token: refreshToken
     }
-    const res = await fetchAPI("/login/refresh", params);
+    const res = await get("/login/refresh", params);
     if (!res.ok) return undefined;
     const token = res.json() as Promise<SpotifyAuthResponse>;
     return token;
