@@ -1,7 +1,8 @@
-const BASE_URL = "http://127.0.0.1:5000";
+const BASE_URL = "http://localhost";
 
 const apiURL = (endpoint: string, params = {}) => {
     const paramsString = new URLSearchParams(params).toString();
+    if (endpoint[0] === "/") endpoint = endpoint.slice(1);
     const endpointUrl = `${BASE_URL}/${endpoint}`;
     return paramsString ? `${endpointUrl}?${paramsString}` : endpointUrl;
 }

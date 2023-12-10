@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // TODO: request.url (there's confusion between 127.0.0.1 and localhost)
-    return NextResponse.redirect(new URL('/import/success', request.url));
+    // return NextResponse.redirect(new URL('/import/success', request.url));
+    return NextResponse.redirect(new URL('/import/success', "http://127.0.0.1:3000"));
 
 }
